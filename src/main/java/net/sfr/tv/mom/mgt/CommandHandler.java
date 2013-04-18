@@ -1,5 +1,5 @@
 /**
- * Copyright 2012,2013 - Société Française de Radiotéléphonie (http://www.sfr.com/)
+ * Copyright 2012,2013 - SFR (http://www.sfr.com/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,6 +17,7 @@ package net.sfr.tv.mom.mgt;
 
 import java.text.MessageFormat;
 import javax.management.MBeanServerConnection;
+import net.sfr.tv.contributed.Ansi;
 
 /**
  *
@@ -39,7 +40,7 @@ public abstract class CommandHandler {
     protected StringBuilder getOutput() {
         StringBuilder output = new StringBuilder();
         if (title != null) {
-            output.append("\n# ").append(title).append(" : \n");
+            output.append("\n").append(Ansi.format("# ".concat(title), Ansi.Color.GREEN)).append(" : \n");
         }
         return output;
     }
@@ -57,7 +58,6 @@ public abstract class CommandHandler {
             result = expression;
         }
         
-        //System.out.println("renderExpression -> " + result);
         return result;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012,2013 - Société Française de Radiotéléphonie (http://www.sfr.com/)
+ * Copyright 2012,2013 - SFR (http://www.sfr.com/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import net.sfr.tv.mom.mgt.CommandRouter.Option;
  * 
  * @author matthieu.chaplin@sfr.com
  */
+@Deprecated
 public class CommandBinding {
 
     private Command cmd;

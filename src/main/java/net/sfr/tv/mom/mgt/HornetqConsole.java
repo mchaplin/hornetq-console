@@ -1,5 +1,5 @@
 /**
- * Copyright 2012,2013 - Société Française de Radiotéléphonie (http://www.sfr.com/)
+ * Copyright 2012,2013 - SFR (http://www.sfr.com/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,8 +26,11 @@ import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import net.sfr.tv.contributed.Ansi;
+import net.sfr.tv.contributed.Ansi.Color;
 import net.sfr.tv.mom.mgt.CommandRouter.Command;
 import net.sfr.tv.mom.mgt.CommandRouter.Option;
+import net.sfr.tv.mom.mgt.handlers.InvocationHandler;
 
 /**
  *
@@ -36,6 +39,8 @@ import net.sfr.tv.mom.mgt.CommandRouter.Option;
 public class HornetqConsole {
 
     private static final Logger LOGGER = Logger.getLogger(HornetqConsole.class.getName());
+    
+    private static final String VERSION = "0.6.1";
 
     /**
      * @param args the command line arguments
@@ -66,7 +71,7 @@ public class HornetqConsole {
             // Check for arguments consistency
             if (jmxHost == null || jmxHost.trim().equals("") || jmxPort == null || jmxPort.equals("")) {
                 LOGGER.info("Usage : ");
-                LOGGER.info("hqconsole.jar -h [JMX host] -p [JMX port]\n");
+                LOGGER.info("hq-console.jar <-h host(127.0.0.1)> <-p port(6001)>\n");
                 System.exit(1);
             }
 
@@ -78,7 +83,8 @@ public class HornetqConsole {
 
             MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
 
-            System.out.println("\nSuccessfully connected to JMX service URL : ".concat(jmxServiceUrl.toString()));
+            System.out.println("\n".concat(Ansi.format("HornetQ Console ".concat(VERSION), Color.CYAN)));
+            System.out.println("\n".concat(Ansi.format("Successfully connected to JMX service URL : ".concat(jmxServiceUrl.toString()), Color.YELLOW)));
             
             CommandRouter router = new CommandRouter();
 
@@ -86,6 +92,8 @@ public class HornetqConsole {
             System.out.print((String) router.get(Command.STATUS, Option.VM).execute(mbsc, null));
             System.out.print((String) router.get(Command.STATUS, Option.SERVER).execute(mbsc, null));
             System.out.print((String) router.get(Command.STATUS, Option.CLUSTER).execute(mbsc, null));
+            
+            printHelp(router);
             
             // START COMMAND LINE
             Scanner scanner = new Scanner(System.in);
@@ -103,7 +111,7 @@ public class HornetqConsole {
                 
                 Command cmd = Command.fromString(cliArgs[0]);
                 if (cmd == null) {
-                    System.out.print("Syntax error !\n");
+                    System.out.print(Ansi.format("Syntax error !", Color.RED).concat("\n"));
                     cmd = Command.HELP;
                 }
                 
@@ -145,16 +153,7 @@ public class HornetqConsole {
                         break;
 
                     case HELP :
-                        System.out.println("Available commands : ");
-                        for (Command cmde : Command.values()) {
-                            options = router.get(cmde);
-                            if (options == null) {
-                                continue;
-                            }
-                            for (Option opt : options) {
-                                System.out.println("\t".concat(cmde.name()).toLowerCase().concat(" ").concat(opt.name().toLowerCase()).concat(" : ").concat(router.get(cmde, opt).getHelpMessage()));
-                            }
-                        }
+                        printHelp(router);
                         break;
                 }
             }
@@ -164,11 +163,31 @@ public class HornetqConsole {
             LOGGER.log(Level.SEVERE, null, ex);
         }
 
-        echo("\nBye!");
+        echo("\n".concat(Ansi.format("Bye!", Color.CYAN)));
 
     }
 
     private static void echo(String msg) {
         System.out.println(msg);
+    }
+
+    private static void printHelp(CommandRouter router) {
+        
+        Set<Option> options;
+        System.out.println(Ansi.format("Available commands : ", Color.YELLOW));
+        for (Command cmde : Command.values()) {
+            options = router.get(cmde);
+            if (options == null) {
+                continue;
+            }
+            for (Option opt : options) {
+                System.out.println("\t"
+                        .concat(cmde.name()).toLowerCase()
+                        .concat(" ").concat(opt.name().toLowerCase())
+                        .concat(InvocationHandler.class.isAssignableFrom(router.get(cmde, opt).getClass()) ? ((InvocationHandler) router.get(cmde, opt)).printSignature() : "")
+                        .concat(" : ")
+                        .concat(router.get(cmde, opt).getHelpMessage()));
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012,2013 - Société Française de Radiotéléphonie (http://www.sfr.com/)
+ * Copyright 2012,2013 - SFR (http://www.sfr.com/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -109,7 +109,8 @@ public class CommandRouter {
         Map<Option,CommandHandler> listBindings = new HashMap<>();
         listBindings.put(Option.CONNS, new InvocationHandler(
                 "org.hornetq:module=Core,type=Server", 
-                new Operation("listRemoteAddresses", new String[0]), new InetAdressCountFormatter(),
+                new Operation("listRemoteAddresses", new String[0]), 
+                new InetAdressCountFormatter(),
                 "List connections to server instance by source IPs"));
         
         listBindings.put(Option.JMS, new QueryHandler(
@@ -128,15 +129,18 @@ public class CommandRouter {
         //dropBindings.put(Option.SUBSCRIPTION, new SubscriptionHandler());
         dropBindings.put(Option.CONNS, new InvocationHandler(
                 "org.hornetq:module=Core,type=Server", 
-                new Operation("closeConnectionsForAddress", new String[] {"java.lang.String"}), new DefaultFormatter(),
+                new Operation("closeConnectionsForAddress", new String[] {"java.lang.String"}), 
+                new DefaultFormatter(),
                 "Drop a client connection"));
         dropBindings.put(Option.QUEUE, new InvocationHandler(
                 "org.hornetq:module=Core,type=Server", 
-                new Operation("destroyQueue", new String[] {"java.lang.String"}), new DefaultFormatter(),
+                new Operation("destroyQueue", new String[] {"java.lang.String"}), 
+                new DefaultFormatter(),
                 "Drops a core queue"));
         dropBindings.put(Option.MESSAGES, new InvocationHandler(
                 "{0}", 
-                new Operation("removeMessages", new String[] {"java.lang.String"}), new DefaultFormatter(),
+                new Operation("removeMessages", new String[] {"java.lang.String"}), 
+                new DefaultFormatter(),
                 "Drop messages from a core queue"));
         
         bindings.put(Command.DROP, dropBindings);
