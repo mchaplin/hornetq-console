@@ -36,5 +36,3 @@ with :
     java -jar /usr/local/bin/hq-console/hq-console-0.6.1-SNAPSHOT-jar-with-dependencies.jar -h <host> -p <port>
 
 Once connected, use 'help' command
-
-Inquiries ? matthieu.chaplin@sfr.com
