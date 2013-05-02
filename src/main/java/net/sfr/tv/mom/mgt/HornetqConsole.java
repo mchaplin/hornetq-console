@@ -75,18 +75,26 @@ public class HornetqConsole {
                 System.exit(1);
             }
 
+            System.out.println("\n".concat(Ansi.format("HornetQ Console ".concat(VERSION), Color.CYAN)));
+            
             StringBuilder jmxServiceUrl = new StringBuilder();
             jmxServiceUrl.append("service:jmx:rmi://").append(jmxHost).append(":").append(jmxPort).append("/jndi/rmi://").append(jmxHost).append(":").append(jmxPort).append("/jmxrmi");
 
             JMXServiceURL url = new JMXServiceURL(jmxServiceUrl.toString());
-            JMXConnector jmxc = JMXConnectorFactory.connect(url, null);
-
-            MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
-
-            System.out.println("\n".concat(Ansi.format("HornetQ Console ".concat(VERSION), Color.CYAN)));
-            System.out.println("\n".concat(Ansi.format("Successfully connected to JMX service URL : ".concat(jmxServiceUrl.toString()), Color.YELLOW)));
+            JMXConnector jmxc = null;
             
             CommandRouter router = new CommandRouter();
+            
+            try {
+                jmxc = JMXConnectorFactory.connect(url, null);
+            } catch (Throwable t) {
+                System.out.println("\n".concat(Ansi.format("Unable to connect to JMX service URL : ".concat(jmxServiceUrl.toString()), Color.RED)));
+                printHelp(router);
+            }
+            
+            System.out.println("\n".concat(Ansi.format("Successfully connected to JMX service URL : ".concat(jmxServiceUrl.toString()), Color.YELLOW)));
+            
+            MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
 
             // PRINT SERVER STATUS REPORT
             System.out.print((String) router.get(Command.STATUS, Option.VM).execute(mbsc, null));

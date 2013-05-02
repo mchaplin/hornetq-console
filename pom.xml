@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <scm>
-      <developerConnection>scm:git:https://github.com/mchaplin/hq-console.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/mchaplin/hq-console.git</developerConnection>
     </scm> 
 
     <properties>
@@ -15,6 +15,14 @@
     <version>0.6.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>HornetQ Console</name>
+    
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <dependencies>
         <dependency>
@@ -25,7 +33,12 @@
         <dependency>
             <groupId>org.hornetq</groupId>  
             <artifactId>hornetq-jms</artifactId>  
-            <version>2.2.20.EAP.GA</version>  
+            <version>2.2.21.Final</version>  
+        </dependency>
+        <dependency>
+            <groupId>org.hornetq</groupId>  
+            <artifactId>hornetq-core</artifactId>  
+            <version>2.2.21.Final</version>  
         </dependency>
     </dependencies>
    
@@ -47,18 +60,44 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>net.sfr.tv.mom.mgt.HornetqConsole</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-release-plugin</artifactId>
-              <version>2.4.1</version>
-              <!--<configuration>
-                <tagBase>https://svn.mycompany.com/repos/myapplication/releases</tagBase>
-              </configuration>-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.4.1</version>
+                <!--<configuration>
+                  <tagBase>https://svn.mycompany.com/repos/myapplication/releases</tagBase>
+                </configuration>-->
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>net.sfr.tv.mom.mgt.HornetqConsole</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -101,7 +101,7 @@ public class CommandRouter {
                 "Queue Status Report",
                 "org.hornetq:module=Core,type=Queue,address=*,name={0}", 
                 new String[] {"Address","ConsumerCount","DeadLetterAddress","DeliveringCount","Durable","ExpiryAddress","Filter","ID","MessageCount","MessagesAdded","Name","Paused"},
-                "Query physical queues status"));
+                "Query physical queues status. (Ex : status queue <core-queue-name>)"));
         
         bindings.put(Command.STATUS, statusBindings);
         
@@ -131,17 +131,17 @@ public class CommandRouter {
                 "org.hornetq:module=Core,type=Server", 
                 new Operation("closeConnectionsForAddress", new String[] {"java.lang.String"}), 
                 new DefaultFormatter(),
-                "Drop a client connection"));
+                "Drop a client connection. (Ex : drop conns <ip-address>)"));
         dropBindings.put(Option.QUEUE, new InvocationHandler(
                 "org.hornetq:module=Core,type=Server", 
                 new Operation("destroyQueue", new String[] {"java.lang.String"}), 
                 new DefaultFormatter(),
-                "Drops a core queue"));
+                "Drops a core queue. (Ex : drop queue <core-queue-name>)"));
         dropBindings.put(Option.MESSAGES, new InvocationHandler(
-                "{0}", 
+                "org.hornetq:module=Core,type=Queue,address=*,name={0}", 
                 new Operation("removeMessages", new String[] {"java.lang.String"}), 
                 new DefaultFormatter(),
-                "Drop messages from a core queue"));
+                "Drop messages from a core queue. (Ex : drop messages <core-queue-name> <filter>)"));
         
         bindings.put(Command.DROP, dropBindings);
         

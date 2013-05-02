@@ -17,6 +17,8 @@ package net.sfr.tv.mom.mgt.handlers;
 
 import net.sfr.tv.mom.mgt.formatters.Formatter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.InstanceNotFoundException;
@@ -48,14 +50,20 @@ public class InvocationHandler extends CommandHandler {
     @Override
     public Object execute(MBeanServerConnection connection, Object[] args) {
         
-        Object result;
+        Object result = null;
         
-        //expression = renderExpression(args);
+        if (this.expression.indexOf("{") != -1) {
+            this.expression = renderExpression(new Object[]{"\"".concat(args[0].toString()).concat("\"")});
+            args = Arrays.copyOfRange(args, 1, args.length);
+        }
         
         try {
+            Set<ObjectName> oNames = connection.queryNames(new ObjectName(expression), null);
+            if (oNames != null && !oNames.isEmpty()) {
+                result = connection.invoke(oNames.iterator().next(), operation.getName(), args, operation.getSignature());
+            }
             //result = connection.invoke(new ObjectName(expression), operation.getName(), new Object[operation.getSignature().length], operation.getSignature());
-            result = connection.invoke(new ObjectName(expression), operation.getName(), args, operation.getSignature());
-        } catch (MBeanException | InstanceNotFoundException | MalformedObjectNameException | ReflectionException | IOException ex) {
+        } catch (MBeanException | IllegalArgumentException | InstanceNotFoundException | MalformedObjectNameException | ReflectionException | IOException ex) {
             Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
