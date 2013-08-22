@@ -24,6 +24,7 @@ Building from sources :
 ===============================================================================
 
 git clone git://github.com/mchaplin/hq-console.git
+
 mvn package
 
 Binary release is available under target/hq-console-<version>-jar-with-dependencies.jar
