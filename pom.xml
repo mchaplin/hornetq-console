@@ -12,7 +12,7 @@
    
     <groupId>net.sfr.tv</groupId>
     <artifactId>hq-console</artifactId>
-    <version>0.6.1-SNAPSHOT</version>
+    <version>0.6.1</version>
     <packaging>jar</packaging>
     <name>HornetQ Console</name>
     
@@ -44,8 +44,8 @@
             <groupId>net.sfr.tv</groupId>
             <artifactId>jmx-staticport-agent</artifactId>
             <version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/src/main/resources/jmx-staticport-agent.jar</systemPath>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/jmx-staticport-agent.jar</systemPath>
         </dependency>
     </dependencies>
    
@@ -63,6 +63,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
                 <configuration>
                     <archive>
                         <manifest>
