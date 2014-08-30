@@ -87,11 +87,14 @@ public class HornetqConsole {
             
             try {
                 jmxc = JMXConnectorFactory.connect(url, null);
-            } catch (Throwable t) {
+                assert jmxc != null; // jmxc must be not null
+            }
+            catch (Throwable t) {
                 System.out.println("\n".concat(Ansi.format("Unable to connect to JMX service URL : ".concat(jmxServiceUrl.toString()), Color.RED)));
+                System.out.println("\n".concat(Ansi.format("Did you set the com.sun.management.jmxremote.port option ?", Color.CYAN)));
                 printHelp(router);
             }
-            
+
             System.out.println("\n".concat(Ansi.format("Successfully connected to JMX service URL : ".concat(jmxServiceUrl.toString()), Color.YELLOW)));
             
             MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
