@@ -49,4 +49,6 @@ To specify the RMI port to use for remote JMX add the following option to the va
 -Dcom.sun.management.jmxremote.port=6001 
 ```
 
+If the static RMI port has been set with jmx-staticport-agent then you have to had the jar in your classpath.
+
 Once connected, use 'help' command
