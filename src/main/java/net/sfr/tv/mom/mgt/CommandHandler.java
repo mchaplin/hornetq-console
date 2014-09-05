@@ -18,6 +18,7 @@ package net.sfr.tv.mom.mgt;
 import java.text.MessageFormat;
 import javax.management.MBeanServerConnection;
 import net.sfr.tv.contributed.Ansi;
+import org.apache.commons.lang3.SystemUtils;
 
 /**
  *
@@ -40,7 +41,10 @@ public abstract class CommandHandler {
     protected StringBuilder getOutput() {
         StringBuilder output = new StringBuilder();
         if (title != null) {
-            output.append("\n").append(Ansi.format("# ".concat(title), Ansi.Color.GREEN)).append(" : \n");
+            output.append(SystemUtils.LINE_SEPARATOR)
+                    .append(Ansi.format("# ".concat(title), Ansi.Color.GREEN))
+                    .append(" : ")
+                    .append(SystemUtils.LINE_SEPARATOR);
         }
         return output;
     }
