@@ -15,32 +15,35 @@
  */
 package net.sfr.tv.mom.mgt.handlers;
 
+import net.sfr.tv.mom.mgt.CommandHandler;
 import net.sfr.tv.mom.mgt.formatters.Formatter;
+import net.sfr.tv.mom.mgt.model.Operation;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.management.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import net.sfr.tv.mom.mgt.CommandHandler;
-import net.sfr.tv.mom.mgt.model.Operation;
 
 /**
  *
  * @author matthieu.chaplin@sfr.com
  */
 public class InvocationHandler extends CommandHandler {
-    
-    private Operation operation;
-    
-    private Formatter formatter;
 
-    public InvocationHandler(String expression, Operation operation, Formatter formatter, String help) {
+    private static final Logger LOGGER = Logger.getLogger(InvocationHandler.class.getName());
+
+    private final Operation operation;
+    
+    private final Formatter formatter;
+
+    public InvocationHandler(final String expression, final Operation operation, final Formatter formatter,
+                             final String help) {
+        if (StringUtils.isEmpty(expression)) throw new IllegalArgumentException("Expression must be not null or empty");
+        if (null == operation) throw new IllegalArgumentException("Operation must be not null");
+        if (null == formatter) throw new IllegalArgumentException("Formatter must be not null");
         this.expression = expression;
         this.operation = operation;
         this.formatter = formatter;
@@ -49,26 +52,33 @@ public class InvocationHandler extends CommandHandler {
 
     @Override
     public Object execute(MBeanServerConnection connection, Object[] args) {
-        
-        Object result = null;
-        
         if (this.expression.indexOf("{") != -1) {
             this.expression = renderExpression(new Object[]{"\"".concat(args[0].toString()).concat("\"")});
             args = Arrays.copyOfRange(args, 1, args.length);
         }
         
         try {
-            Set<ObjectName> oNames = connection.queryNames(new ObjectName(expression), null);
-            if (oNames != null && !oNames.isEmpty()) {
-                result = connection.invoke(oNames.iterator().next(), operation.getName(), args, operation.getSignature());
+            final Set<ObjectName> oNames = connection.queryNames(new ObjectName(expression), null);
+            if (oNames == null || oNames.isEmpty()) {
+                LOGGER.severe("No object names returns for expression '"+ expression +"'");
+                return null;
+            }
+            else {
+                final Object result = connection.invoke(oNames.iterator().next(), operation.getName(),
+                        args, operation.getSignature());
+                if (result == null) {
+                    LOGGER.warning("Result of operation '" + operation.getName() + "'is null");
+                    return result;
+                }
+                return formatter.format(result);
             }
             //result = connection.invoke(new ObjectName(expression), operation.getName(), new Object[operation.getSignature().length], operation.getSignature());
-        } catch (MBeanException | IllegalArgumentException | InstanceNotFoundException | MalformedObjectNameException | ReflectionException | IOException ex) {
-            Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (MBeanException | IllegalArgumentException | InstanceNotFoundException | MalformedObjectNameException |
+                ReflectionException | IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
             return null;
         }
-        
-        return formatter.format(result);
     }
     
     public String printSignature() {
@@ -77,8 +87,7 @@ public class InvocationHandler extends CommandHandler {
             return "";
         }
         
-        StringBuilder sb = new StringBuilder();
-        sb.append(" (");
+        final StringBuilder sb = new StringBuilder(" (");
         for (String arg : operation.getSignature()) {
             sb.append(arg);
         }
