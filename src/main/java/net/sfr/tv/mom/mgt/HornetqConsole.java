@@ -31,6 +31,9 @@ import net.sfr.tv.contributed.Ansi.Color;
 import net.sfr.tv.mom.mgt.CommandRouter.Command;
 import net.sfr.tv.mom.mgt.CommandRouter.Option;
 import net.sfr.tv.mom.mgt.handlers.InvocationHandler;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  *
@@ -69,35 +72,40 @@ public class HornetqConsole {
             }
 
             // Check for arguments consistency
-            if (jmxHost == null || jmxHost.trim().equals("") || jmxPort == null || jmxPort.equals("")) {
+            if (StringUtils.isEmpty(jmxHost) || !NumberUtils.isNumber(jmxPort)) {
                 LOGGER.info("Usage : ");
                 LOGGER.info("hq-console.jar <-h host(127.0.0.1)> <-p port(6001)>\n");
                 System.exit(1);
             }
 
-            System.out.println("\n".concat(Ansi.format("HornetQ Console ".concat(VERSION), Color.CYAN)));
+            System.out.println(SystemUtils.LINE_SEPARATOR.concat(Ansi.format("HornetQ Console ".concat(VERSION), Color.CYAN)));
             
-            StringBuilder jmxServiceUrl = new StringBuilder();
-            jmxServiceUrl.append("service:jmx:rmi://").append(jmxHost).append(":").append(jmxPort).append("/jndi/rmi://").append(jmxHost).append(":").append(jmxPort).append("/jmxrmi");
+            final StringBuilder _url = new StringBuilder("service:jmx:rmi://")
+                .append(jmxHost).append(':').append(jmxPort).append("/jndi/rmi://")
+                .append(jmxHost).append(':').append(jmxPort).append("/jmxrmi");
 
-            JMXServiceURL url = new JMXServiceURL(jmxServiceUrl.toString());
+            final String jmxServiceUrl = _url.toString();
             JMXConnector jmxc = null;
             
-            CommandRouter router = new CommandRouter();
+            final CommandRouter router = new CommandRouter();
             
             try {
-                jmxc = JMXConnectorFactory.connect(url, null);
+                jmxc = JMXConnectorFactory.connect(new JMXServiceURL(jmxServiceUrl), null);
                 assert jmxc != null; // jmxc must be not null
             }
+            catch(final MalformedURLException e) {
+                System.out.println(SystemUtils.LINE_SEPARATOR.concat(Ansi.format(jmxServiceUrl + " :"+ e.getMessage(), Color.RED)));
+            }
             catch (Throwable t) {
-                System.out.println("\n".concat(Ansi.format("Unable to connect to JMX service URL : ".concat(jmxServiceUrl.toString()), Color.RED)));
-                System.out.println("\n".concat(Ansi.format("Did you set the com.sun.management.jmxremote.port option ?", Color.CYAN)));
-                printHelp(router);
+                System.out.println(SystemUtils.LINE_SEPARATOR.concat(Ansi.format("Unable to connect to JMX service URL : ".concat(jmxServiceUrl), Color.RED)));
+                System.out.print(SystemUtils.LINE_SEPARATOR.concat(Ansi.format("Did you add jmx-staticport-agent.jar to your classpath ?", Color.MAGENTA)));
+                System.out.println(SystemUtils.LINE_SEPARATOR.concat(Ansi.format("Or did you set the com.sun.management.jmxremote.port option in the hornetq server startup script ?", Color.MAGENTA)));
+                System.exit(-1);
             }
 
-            System.out.println("\n".concat(Ansi.format("Successfully connected to JMX service URL : ".concat(jmxServiceUrl.toString()), Color.YELLOW)));
+            System.out.println("\n".concat(Ansi.format("Successfully connected to JMX service URL : ".concat(jmxServiceUrl), Color.YELLOW)));
             
-            MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
+            final MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
 
             // PRINT SERVER STATUS REPORT
             System.out.print((String) router.get(Command.STATUS, Option.VM).execute(mbsc, null));
@@ -174,7 +182,7 @@ public class HornetqConsole {
             LOGGER.log(Level.SEVERE, null, ex);
         }
 
-        echo("\n".concat(Ansi.format("Bye!", Color.CYAN)));
+        echo(SystemUtils.LINE_SEPARATOR.concat(Ansi.format("Bye!", Color.CYAN)));
 
     }
 
